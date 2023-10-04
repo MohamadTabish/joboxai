@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC Stream to Python</title>
+</head>
+<body>
+    <button onclick="startStreaming()">Start Streaming</button>
+    <script>
+        let peerConnection;
+        let socket;
+
+        async function startStreaming() {
+            socket = new WebSocket('ws//:127.0.0.1:5000/');
+            
+            try {
+                console.log(socket)
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                const videoElement = document.createElement('video');
+                videoElement.srcObject = stream;
+                document.body.appendChild(videoElement);
+                videoElement.play();
+
+                peerConnection = new RTCPeerConnection();
+
+                stream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, stream);
+                });
+
+                peerConnection.createOffer()
+                    .then(offer => peerConnection.setLocalDescription(offer))
+                    .then(() => {
+                        socket.send(JSON.stringify({ "offer": peerConnection.localDescription }));
+                    });
+
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        socket.send(JSON.stringify({ "ice-candidate": event.candidate }));
+                    }
+                };
+            } catch (error) {
+                console.error('Error accessing user media:', error);
+            }
+        }
+
+        // Handle data received from the server (if needed)
+        socket.onmessage = event => {
+            // Handle data received from Python server
+        };
+    </script>    
+</body>
+</html>
