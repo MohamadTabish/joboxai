@@ -7,7 +7,7 @@ import mediapipe as mp
 X_AXIS_CHEAT = 0
 Y_AXIS_CHEAT = 0
 NO_FACE_CHEAT = 0
-
+# arbaz
 def pose():
     global X_AXIS_CHEAT, Y_AXIS_CHEAT, NO_FACE_CHEAT
 
